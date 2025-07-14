@@ -30,7 +30,7 @@ garantir_venv()
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-PASTAS = ['doc', 'notebooks', 'scripts', 'pdf', '.info', '.log', '.exec', '.functions', 'markdown']
+PASTAS = ['doc', 'notebooks', 'scripts', 'pdf', '.info', '.log', '.functions', 'markdown']
 
 # Logger global (provisório, será configurado depois)
 logger = logging.getLogger(__name__)
