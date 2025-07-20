@@ -30,7 +30,7 @@ garantir_venv()
 
 # ---------------------------------------------------------------------------------------------------------------------
 
-PASTAS = ['doc', 'notebooks', 'scripts', 'pdf', '.info', '.log', '.functions', 'markdown']
+PASTAS = ['doc', 'notebooks', 'scripts', 'pdf', 'info', 'log', 'functions', 'markdown', 'key']
 
 # Logger global (provisório, será configurado depois)
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 def configurar_logger(base_dir: Path):
-    log_dir = base_dir / ".log"
+    log_dir = base_dir / "log"
     log_dir.mkdir(parents=True, exist_ok=True)
 
     log_filename = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + ".log"
@@ -83,7 +83,7 @@ def criar_pastas(base_dir, pastas, logger):
             logger.info(f"[+] Criada pasta: {dir_path}")
         else:
             logger.info(f"[=] Pasta já existe: {dir_path}")
-        if pasta == ".functions":
+        if pasta == "functions":
             from pathlib import Path
             from main import criar_funcoes_padrao
             criar_funcoes_padrao(dir_path)
@@ -125,25 +125,61 @@ def criar_pastas(base_dir: Path):
         if not dir_path.exists():
             dir_path.mkdir(parents=True)
             logger.info(f"[+] Criada pasta: {dir_path}")
-            if pasta == ".functions":
+            if pasta == "functions":
                 criar_funcoes_padrao(dir_path)
         else:
             logger.info(f"[=] Pasta já existe: {dir_path}")
+ 
+# ---------------------------------------------------------------------------------------------------------------------           
+def upsert_key_gpt():
+    file_path = "key/OPENAI_API_KEY.txt"
+
+    get_key = input("Cole aqui o token da OpenAI: ")
+        
+    # Garante que a pasta 'key/' exista
+    os.makedirs("key", exist_ok=True)
+
+    with open(file_path, "w") as file:
+        file.write(get_key)
+
+    print("Token salvo em 'key/OPENAI_API_KEY.txt'")
+    return get_key
+
+# ---------------------------------------------------------------------------------------------------------------------
+def crete_key_gpt():
+    file_path = "key/OPENAI_API_KEY.txt"
+
+    # Verifica se o arquivo já existe
+    if os.path.exists(file_path):
+        print(f"O arquivo '{file_path}' já existe.")
+        with open(file_path, "r") as f:
+            key = f.read().strip()
+        print("Token atual:\n", key)
+        resp = input("Deseja alterar o token? (s/n): ").strip().lower()
+        if resp == 's':
+            upsert_key_gpt()
+        else:
+            print("Nenhuma alteração foi feita.")
+        return key
+    else:
+        upsert_key_gpt()
 
 # ---------------------------------------------------------------------------------------------------------------------
 def main():
     base_dir = Path(__file__).resolve().parent
+    
+    crete_key_gpt()
 
     # 1. Criar pastas e arquivos de função (sem depender de importações)
     criar_pastas(base_dir)  # Esta é a função local declarada antes
 
-    # 2. Adicionar caminho de .functions ao sys.path
-    sys.path.insert(0, str(base_dir / ".functions"))
+    # 2. Adicionar caminho de functions ao sys.path
+    sys.path.insert(0, str(base_dir / "functions"))
 
     # 3. Agora sim, importar os módulos personalizados
-    from log import configurar_logger
-    from estrutura import criar_pastas as criar_pastas_dinamico
-    from conversao import converte_to_md
+    from functions.log import configurar_logger
+    from functions.estrutura import criar_pastas as criar_pastas_dinamico
+    from functions.conversao import converte_to_md
 
     # 4. Configurar logger (após importação)
     global logger
